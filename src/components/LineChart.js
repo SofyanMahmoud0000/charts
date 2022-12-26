@@ -1,5 +1,5 @@
-import React, {useState, useEffect} from 'react'
-import { Line, Doughnut } from 'react-chartjs-2';
+import React, { useState, useEffect } from 'react'
+import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import * as Papa from 'papaparse';
 import {
   Chart as ChartJS,
@@ -7,6 +7,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -14,9 +15,12 @@ import {
 } from 'chart.js';
 import { FILES } from '../enums/Files';
 import { COLUMN } from '../enums/Columns';
-import {loadCSVFile} from "../services/CSVLoader"
+import { loadCSVFile } from '../services/CSVLoader';
+import * as MATH_UTILS from "../Utils/Math"
+import { GENDER } from '../enums/Constants';
 
-import file from "./dataFile.csv"
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
 
 ChartJS.register(
   CategoryScale,
@@ -25,64 +29,76 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
+  BarElement,
   Legend,
   ArcElement
 );
 
 export const LineChart = () => {
+  const files = loadCSVFile()
+  const [file, setFile] = useState(files[FILES.FILE_1])
 
-  const [allData, setAllData] = useState([])
-  let femaleCount = 0
-  let maleCount = 0
-
-
-  const file = require('./dataFile.csv')
+  const [data, setData] = useState([])
 
   const femaleAndMale = Array(24).fill(0)
   const female = Array(9).fill(0)
   const male = Array(9).fill(0)
-  const agesObject = []
-  const agesLabels = []
-  const agesValues = []
-  
+
+  let femaleCount = 0
+  let maleCount = 0
+
+  const ages = {}
+
+  const timeDiff = {}
+
   useEffect(() => {
     fetch(file)
       .then(res => res.text())
       .then(res => {
-        const allData = Papa.parse(res, { header: true }).data;
-        setAllData(allData)
+        const data = Papa.parse(res, { header: true }).data;
+        setData(data)
       })
-  }, [])
+  }, [file])
 
-  for(let i = 0; i < allData.length; i++) {
-    let hour = allData[i][COLUMN.IN_HOUR]
-    let f = allData[i][COLUMN.GENDER] == 'F'
-    let m = allData[i][COLUMN.GENDER] == 'M'
-    let age = allData[i][COLUMN.AGE]
-    femaleAndMale[hour-1] += 1;
-    female[hour-1] += !!f;
-    male[hour-1] += !!m;
+  for (let i = 0; i < data.length; i++) {
+    let hour = data[i][COLUMN.IN_HOUR]
+    let isFemale = data[i][COLUMN.GENDER] == GENDER.FEMALE
+    let isMale = data[i][COLUMN.GENDER] == GENDER.MALE
+    let age = data[i][COLUMN.AGE]
+    femaleAndMale[hour - 1] += 1;
+    female[hour - 1] += !!isFemale;
+    male[hour - 1] += !!isMale;
 
-    if(agesObject.hasOwnProperty(age)) agesObject[age]++;
-    else agesObject[age] = 1
+    if (ages.hasOwnProperty(age)) ages[age]++;
+    else ages[age] = 1
 
-    maleCount += !!m;
-    femaleCount += !!f
+    maleCount += !!isMale;
+    femaleCount += !!isFemale
+
+    if (!!data[i][COLUMN.IN_HOUR]
+      && !!data[i][COLUMN.IN_HOUR]
+      && !!data[i][COLUMN.IN_HOUR]
+      && !!data[i][COLUMN.IN_HOUR]) {
+      let diffMin = data[i][COLUMN.OUT_MIN] - data[i][COLUMN.IN_MIN]
+      let diffHour = data[i][COLUMN.OUT_HOUR] - data[i][COLUMN.IN_HOUR]
+
+      let totalDiffInMins = (diffHour * 60) + diffMin
+
+      if (totalDiffInMins >= 0) {
+        totalDiffInMins = Math.max(totalDiffInMins, 1)
+        if (timeDiff.hasOwnProperty(totalDiffInMins)) timeDiff[totalDiffInMins]++;
+        else timeDiff[totalDiffInMins] = 1
+      }
+    }
   }
 
-  for (const ageLabel in agesObject) {
-    let ageValue = agesObject[ageLabel]
-    agesLabels.push(ageLabel)
-    agesValues.push(ageValue)
-  }
+  console.log("timeDiff", timeDiff)
 
-  console.log("ages", agesObject)
+  let lineChartLables = [];
+  for (let i = 1; i <= 9; i++) { lineChartLables.push(i) }
 
-  let labels = [];
-  for(let i = 1; i <= 9; i++) {labels = [...labels, i]}
-
-  const data = {
-    labels,
+  const lineChart = {
+    labels: lineChartLables,
     datasets: [
       {
         label: 'female and male',
@@ -106,7 +122,7 @@ export const LineChart = () => {
   };
 
 
-  const data2 = {
+  const genderDoughnut = {
     labels: ['Female', 'Male'],
     datasets: [
       {
@@ -115,44 +131,74 @@ export const LineChart = () => {
         backgroundColor: [
           'rgba(255, 99, 132, 0.2)',
           'rgba(54, 162, 235, 0.2)',
-          
+
         ],
         borderColor: [
           'rgba(255, 99, 132, 1)',
           'rgba(54, 162, 235, 1)',
-          
+
         ],
         borderWidth: 1,
       },
     ],
   };
 
-  const random = () => {
-    return Math.floor(Math.random() * (255 - 0 + 1)) + 0;
-  }
-
-  const data3 = {
-    labels: agesLabels,
+  const ageDoughnut = {
+    labels: Object.keys(ages),
     datasets: [
       {
         label: '# Ages',
-        data: agesValues,
+        data: Object.values(ages),
         borderWidth: 1,
 
-        backgroundColor: agesLabels.map(_ => `rgba(${random()}, ${random()}, ${random()}, 0.2)`)
+        backgroundColor: Object.values(ages).map(_ => {
+          return `rgba(
+                  ${MATH_UTILS.randomColorValue()}
+                  ,${MATH_UTILS.randomColorValue()} 
+                  ,${MATH_UTILS.randomColorValue()}
+                  , 0.2)`
+        })
+      },
+    ],
+  };
+
+  const diffTimeBar = {
+    labels: Object.keys(timeDiff),
+    datasets: [
+      {
+        label: 'Mins',
+        data: Object.values(timeDiff),
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },
     ],
   };
 
   return (
     <>
-      <Line data={data} />
-      <div style={{width:"500px", height:"500px", display:"inline-block"}} >
-        <Doughnut data={data2} />
-      </div>
-      <div style={{width:"500px", height:"500px", display:"inline-block"}} >
-        <Doughnut data={data3} />
-      </div>
+      <Box sx={{ flexGrow: 1 }}>
+        <Grid container spacing={2}>
+          <Grid item xs={6}>
+            <div style={{padding: "10px", margin: "10px"}}>
+              <Line data={lineChart} />
+            </div>
+          </Grid>
+          <Grid item xs={6}>
+            <div style={{padding: "10px", margin: "10px"}}>
+              <Bar data={diffTimeBar} />
+            </div>
+          </Grid>
+          <Grid item xs={6}>
+            <div style={{padding: "10px", margin: "10px", width: "70%"}}>
+              <Doughnut data={genderDoughnut} />
+            </div>
+          </Grid>
+          <Grid item xs={6}>
+            <div style={{padding: "10px", margin: "10px", width: "70%"}}>
+              <Doughnut data={ageDoughnut} />
+            </div>
+          </Grid>
+        </Grid>
+      </Box>
     </>
   )
 }

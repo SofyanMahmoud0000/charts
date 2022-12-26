@@ -1,4 +1,5 @@
-export const loadCSVFile = (path) => {
-  const CSVFile = require(path)
-  console.log(CSVFile)
+export const loadCSVFile = () => {
+  return {
+    "FILE_1": require('../assets/FILE_1.csv')
+  }
 }
