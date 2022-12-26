@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Line, Doughnut, Bar } from 'react-chartjs-2';
 import * as Papa from 'papaparse';
+import Alert from '@mui/material/Alert';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -22,6 +23,10 @@ import { GENDER } from '../enums/Constants';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 
+import FileButtons from './FileButtons';
+import DayButtons from './DayButtons';
+import AppBarCom from './AppBarCom';
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -36,7 +41,10 @@ ChartJS.register(
 
 export const LineChart = () => {
   const files = loadCSVFile()
-  const [file, setFile] = useState(files[FILES.FILE_1])
+
+  const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState(null)
+  const [day, setDay] = useState(null)
 
   const [data, setData] = useState([])
 
@@ -61,6 +69,7 @@ export const LineChart = () => {
   }, [file])
 
   for (let i = 0; i < data.length; i++) {
+    if (day != data[i][COLUMN.DAY]) continue;
     let hour = data[i][COLUMN.IN_HOUR]
     let isFemale = data[i][COLUMN.GENDER] == GENDER.FEMALE
     let isMale = data[i][COLUMN.GENDER] == GENDER.MALE
@@ -173,30 +182,69 @@ export const LineChart = () => {
     ],
   };
 
+  const handleButtonFileClick = (file) => {
+    setFileName(file)
+    setFile(files[file])
+  }
+
+  const handleButtonDayClick = (day) => {
+    setDay(day)
+  }
+
+  console.log("data", data)
+
   return (
     <>
+    <AppBarCom />
       <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <div style={{padding: "10px", margin: "10px"}}>
-              <Line data={lineChart} />
+        <Grid container direction="row" spacing={2} justifyContent="center" alignItems="center">
+          <Grid item xs={12}>
+            <div style={{}}>
+              <FileButtons handleButtonClick={handleButtonFileClick} />
             </div>
           </Grid>
-          <Grid item xs={6}>
-            <div style={{padding: "10px", margin: "10px"}}>
-              <Bar data={diffTimeBar} />
+          <Grid item xs={12}>
+            <div style={{}}>
+              <DayButtons handleButtonClick={handleButtonDayClick} />
             </div>
           </Grid>
-          <Grid item xs={6}>
-            <div style={{padding: "10px", margin: "10px", width: "70%"}}>
-              <Doughnut data={genderDoughnut} />
-            </div>
-          </Grid>
-          <Grid item xs={6}>
-            <div style={{padding: "10px", margin: "10px", width: "70%"}}>
-              <Doughnut data={ageDoughnut} />
-            </div>
-          </Grid>
+          {
+            !fileName || !day ? (
+              <Grid item xs={8}>
+                <div style={{ margin: "10px" }}>
+                  <Alert severity="warning" size="large">Please select a file and day to show the data</Alert>
+                </div>
+              </Grid>
+
+            ) : (
+              <>
+                <Grid item xs={8}>
+                  <div style={{ margin: "10px" }}>
+                    <Alert severity="info" size="large">Statistics for file {fileName} and day {day}</Alert>
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  <div style={{ padding: "10px", margin: "10px" }}>
+                    <Line data={lineChart} />
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  <div style={{ padding: "10px", margin: "10px" }}>
+                    <Bar data={diffTimeBar} />
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                    <Doughnut data={genderDoughnut} />
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                    <Doughnut data={ageDoughnut} />
+                  </div>
+                </Grid>
+              </>)
+          }
         </Grid>
       </Box>
     </>
