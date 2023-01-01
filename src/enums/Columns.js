@@ -6,5 +6,6 @@ export const COLUMN = {
   "GENDER": "Gender",
   "AGE": "Age", 
   "GID": "GID",
-  "DAY": "day"
+  "DAY": "day",
+  "DIFF_MINS": "diff_min"
 }
