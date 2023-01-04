@@ -11,13 +11,14 @@ const FileButtons = ({handleButtonClick}) => {
         {
           Object.values(DAYS).map(DAY => {
             return (
-              <Grid item xs={3} >
+              <Grid item xs={!DAY? 4: 2} >
                 <Button 
                   size="large" 
                   variant="contained" 
                   style={{ width: "50%", margin: "auto", display:"grid" }}
                   onClick={() => handleButtonClick(DAY)}
-                  >Day {DAY}</Button>
+                  color={!DAY? "secondary": "primary"}
+                  >{DAY? `Day ${DAY}`: `All days`}</Button>
               </Grid>
             )
           })

@@ -3,4 +3,5 @@ export const DAYS = {
   DAY_15: 15,
   DAY_16: 16,
   DAY_17: 17,
+  ALL: 0,
 }
