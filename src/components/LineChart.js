@@ -21,6 +21,7 @@ import {
 } from 'chart.js';
 import { FILES } from '../enums/Files';
 import { DAYS } from '../enums/Days';
+import { DAY_COLORS } from '../enums/Days';
 import { COLUMN } from '../enums/Columns';
 import { loadCSVFile } from '../services/CSVLoader';
 import * as MATH_UTILS from "../Utils/Math"
@@ -196,46 +197,24 @@ export const LineChart = () => {
       ret.push({
         label: `All - ${day}`,
         data: allProcessingData[day].femaleAndMale,
-        borderColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          , 0.2)`,
-        backgroundColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          `,
+        borderColor: DAY_COLORS[day],
+        backgroundColor: DAY_COLORS[day],
       })
 
       ret.push({
         label: `female - ${day}`,
         data: allProcessingData[day].female,
-        borderColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          , 0.2)`,
-        backgroundColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          `,
+        borderColor: DAY_COLORS[day],
+        borderDash: [2, 2],
+        backgroundColor: DAY_COLORS[day],
       })
 
       ret.push({
         label: `male - ${day}`,
         data: allProcessingData[day].male,
-        borderColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          , 0.2)`,
-        backgroundColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          `,
+        borderColor: DAY_COLORS[day],
+        borderDash: [10, 10],
+        backgroundColor: DAY_COLORS[day],
       })
     })
 
@@ -254,7 +233,7 @@ export const LineChart = () => {
     datasets: [
       {
         labels: "Gender statistics",
-        data: [maleCount, femaleCount],
+        data: [allProcessingData[day]?.femaleCount || 0, allProcessingData[day]?.maleCount || 0],
         backgroundColor: [
           'rgba(0, 0,0, 0.5)',
           'rgba(255, 99, 132, 0.5)',
@@ -318,16 +297,8 @@ export const LineChart = () => {
       return {
         label: `Day ${day}`,
         data: Object.values(allProcessingData[day].timeDiff),
-        borderColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          , 0.2)`,
-        backgroundColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          `
+        borderColor: DAY_COLORS[day],
+        backgroundColor: DAY_COLORS[day]
       }
     })]
 
@@ -377,16 +348,8 @@ export const LineChart = () => {
       return {
         label: `Day ${day}`,
         data: Object.values(allProcessingData[day].ages),
-        borderColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          , 0.2)`,
-        backgroundColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          `
+        borderColor: DAY_COLORS[day],
+        backgroundColor: DAY_COLORS[day]
       }
     })]
 
@@ -423,16 +386,8 @@ export const LineChart = () => {
       return {
         label: `Day ${day}`,
         data: [allProcessingData[day].femaleCount, allProcessingData[day].maleCount],
-        borderColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          , 0.2)`,
-        backgroundColor: `rgba(
-          ${MATH_UTILS.randomColorValue()}
-          ,${MATH_UTILS.randomColorValue()} 
-          ,${MATH_UTILS.randomColorValue()}
-          `
+        borderColor: DAY_COLORS[day],
+        backgroundColor: DAY_COLORS[day]
       }
     })]
 
@@ -440,7 +395,7 @@ export const LineChart = () => {
   }
 
   const GenderBar = {
-    labels: ["F", "M"],
+    labels: Object.values(GENDER),
     datasets: [
       ...getGenderData()
     ],
@@ -505,7 +460,7 @@ export const LineChart = () => {
                 color="success"
                 style={{ width: "50%", margin: "auto", display: "flex" }}
                 onClick={resetFilter}
-              >Reset filter <RestartAltIcon style={{display:"inline", margin:"0px 2px"}}/></Button>
+              >Reset filter <RestartAltIcon style={{ display: "inline", margin: "0px 2px" }} /></Button>
             </Grid>
           </Grid>
           <Grid item xs={12}>
@@ -526,7 +481,7 @@ export const LineChart = () => {
                 <Grid item xs={8}>
                   <div style={{ margin: "10px" }}>
                     <Alert severity="info" size="large">
-                      Statistics for file {fileName} and {day? ` day ${day}`: `all days`}
+                      Statistics for file {fileName} and {day ? ` day ${day}` : `all days`}
                       {
                         Object.keys(filteration).length ? (
                           <>
@@ -557,10 +512,20 @@ export const LineChart = () => {
                 </Grid>
                 <Grid item xs={6}>
                   <div style={{ padding: "10px", margin: "10px" }}>
-                    <Bar
-                      data={GenderBar}
-                      options={GenderBar.options}
-                    />
+                    {
+                      day == 0 ? (
+                        <Bar
+                          data={GenderBar}
+                          options={GenderBar.options}
+                        />
+                      ) : (
+                        <Doughnut
+                          data={genderDoughnut}
+                          options={genderDoughnut.options}
+                        />
+                      )
+                    }
+
                   </div>
                 </Grid>
                 <Grid item xs={6}>
