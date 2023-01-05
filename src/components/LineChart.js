@@ -26,6 +26,7 @@ import { COLUMN } from '../enums/Columns';
 import { loadCSVFile } from '../services/CSVLoader';
 import * as MATH_UTILS from "../Utils/Math"
 import { GENDER } from '../enums/Constants';
+import { COLORS } from '../enums/Colors';
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -189,7 +190,7 @@ export const LineChart = () => {
   calculateAllDataForCharts()
 
   let lineChartLables = [];
-  for (let i = 1; i <= 9; i++) { lineChartLables.push(i) }
+  for (let i = 1; i <= 8; i++) { lineChartLables.push(i) }
 
   const getDatasetForLineChart = () => {
     let ret = []
@@ -235,13 +236,13 @@ export const LineChart = () => {
         labels: "Gender statistics",
         data: [allProcessingData[day]?.femaleCount || 0, allProcessingData[day]?.maleCount || 0],
         backgroundColor: [
-          'rgba(0, 0,0, 0.5)',
-          'rgba(255, 99, 132, 0.5)',
+          COLORS.COLOR_2,
+          COLORS.COLOR_1,
 
         ],
         borderColor: [
-          'rgb(0, 0, 0)',
-          'rgb(255, 99, 132)',
+          COLORS.COLOR_2,
+          COLORS.COLOR_1,
 
         ],
         borderWidth: 1,
@@ -255,19 +256,19 @@ export const LineChart = () => {
   };
 
   const ageDoughnut = {
-    labels: Object.keys(ages),
+    labels: Object.keys(allProcessingData[day]?.ages || []),
     datasets: [
       {
         label: '# Ages',
-        data: Object.values(ages),
+        data: Object.values(allProcessingData[day]?.ages || []),
         borderWidth: 1,
 
-        backgroundColor: Object.values(ages).map(_ => {
+        backgroundColor: Object.values(allProcessingData[day]?.ages || []).map(_ => {
           return `rgba(
                   ${MATH_UTILS.randomColorValue()}
                   ,${MATH_UTILS.randomColorValue()} 
                   ,${MATH_UTILS.randomColorValue()}
-                  `
+                  ,0.5 `
         })
       },
     ],
@@ -457,8 +458,7 @@ export const LineChart = () => {
               <Button
                 size="large"
                 variant="contained"
-                color="success"
-                style={{ width: "50%", margin: "auto", display: "flex" }}
+                style={{ width: "50%", margin: "auto", display: "flex", backgroundColor:COLORS.COLOR_1 }}
                 onClick={resetFilter}
               >Reset filter <RestartAltIcon style={{ display: "inline", margin: "0px 2px" }} /></Button>
             </Grid>
@@ -511,30 +511,42 @@ export const LineChart = () => {
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div style={{ padding: "10px", margin: "10px" }}>
                     {
                       day == 0 ? (
-                        <Bar
-                          data={GenderBar}
-                          options={GenderBar.options}
-                        />
+                        <div style={{ padding: "10px", margin: "10px auto" }}>
+                          <Bar
+                            data={GenderBar}
+                            options={GenderBar.options}
+                          />
+                        </div>
                       ) : (
-                        <Doughnut
-                          data={genderDoughnut}
-                          options={genderDoughnut.options}
-                        />
+                        <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                          <Doughnut
+                            data={genderDoughnut}
+                            options={genderDoughnut.options}
+                          />
+                        </div>
                       )
                     }
-
-                  </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div style={{ padding: "10px", margin: "10px" }}>
-                    <Bar
-                      data={ageBar}
-                      options={ageBar.options}
-                    />
-                  </div>
+                {
+                      day == 0 ? (
+                        <div style={{ padding: "10px", margin: "10px auto" }}>
+                          <Bar
+                            data={ageBar}
+                            options={ageBar.options}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                          <Doughnut
+                            data={ageDoughnut}
+                            options={ageDoughnut.options}
+                          />
+                        </div>
+                      )
+                    }
                 </Grid>
               </>)
           }

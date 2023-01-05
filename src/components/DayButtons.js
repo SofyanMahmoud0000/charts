@@ -3,6 +3,7 @@ import Button from '@mui/material/Button';
 import { DAYS } from '../enums/Days';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import { COLORS } from "../enums/Colors"
 
 const FileButtons = ({handleButtonClick}) => {
   return (
@@ -15,7 +16,7 @@ const FileButtons = ({handleButtonClick}) => {
                 <Button 
                   size="large" 
                   variant="contained" 
-                  style={{ width: "50%", margin: "auto", display:"grid" }}
+                  style={{ width: "50%", margin: "auto", display:"grid", backgroundColor: !DAY? COLORS.COLOR_2:"" }}
                   onClick={() => handleButtonClick(DAY)}
                   color={!DAY? "secondary": "primary"}
                   >{DAY? `Day ${DAY}`: `All days`}</Button>
