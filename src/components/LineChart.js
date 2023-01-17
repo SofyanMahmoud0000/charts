@@ -69,6 +69,10 @@ export const LineChart = () => {
 
   let timeDiff = {}
 
+  let ageTimeDiff = {}
+
+  let genderTimeDiff = {}
+
   const allProcessingData = {}
 
   const [filteration, setFilteration] = useState({})
@@ -137,6 +141,10 @@ export const LineChart = () => {
 
       timeDiff = {}
 
+      ageTimeDiff = {}
+
+      genderTimeDiff = {}
+
       let noDataInThisDay = true
 
       for (let i = 0; i < data.length; i++) {
@@ -156,6 +164,11 @@ export const LineChart = () => {
         if (ages.hasOwnProperty(age)) ages[age]++;
         else ages[age] = 1
 
+        if (!ageTimeDiff.hasOwnProperty(age)) ageTimeDiff[age] = {}
+
+        let genderKey = isMale? GENDER.MALE: GENDER.FEMALE
+        if (!genderTimeDiff.hasOwnProperty(genderKey)) genderTimeDiff[genderKey] = {}
+
         maleCount += !!isMale;
         femaleCount += !!isFemale
 
@@ -164,8 +177,40 @@ export const LineChart = () => {
         if (totalDiffInMins != -1) {
           if (timeDiff.hasOwnProperty(totalDiffInMins)) timeDiff[totalDiffInMins]++;
           else timeDiff[totalDiffInMins] = 1
+
+          if (ageTimeDiff[age].hasOwnProperty(totalDiffInMins)) ageTimeDiff[age][totalDiffInMins]++;
+          else ageTimeDiff[age][totalDiffInMins] = 1
+
+          let genderKey = isMale? GENDER.MALE: GENDER.FEMALE
+
+          if (genderTimeDiff[genderKey].hasOwnProperty(totalDiffInMins)) genderTimeDiff[genderKey][totalDiffInMins]++;
+          else genderTimeDiff[genderKey][totalDiffInMins] = 1
         }
       }
+
+      Object.keys(ageTimeDiff).forEach(age => {
+        let minsMulWeight = 0
+        let weight = 0
+
+        Object.keys(ageTimeDiff[age]).forEach(mins => {
+          weight += ageTimeDiff[age][mins]
+          minsMulWeight += mins * ageTimeDiff[age][mins]
+        })
+
+        ageTimeDiff[age] = Math.round(minsMulWeight / weight)
+      })
+
+      Object.keys(genderTimeDiff).forEach(gender => {
+        let minsMulWeight = 0
+        let weight = 0
+
+        Object.keys(genderTimeDiff[gender]).forEach(mins => {
+          weight += genderTimeDiff[gender][mins]
+          minsMulWeight += mins * genderTimeDiff[gender][mins]
+        })
+
+        genderTimeDiff[gender] = Math.round(minsMulWeight / weight)
+      })
 
       let currentProcessingData = {
         femaleAndMale,
@@ -175,6 +220,8 @@ export const LineChart = () => {
         femaleCount,
         ages,
         timeDiff,
+        ageTimeDiff,
+        genderTimeDiff
       }
 
       if (!noDataInThisDay) allProcessingData[currentDay] = currentProcessingData
@@ -305,6 +352,81 @@ export const LineChart = () => {
 
     return ret
   }
+
+  const getAgeTimeDiffDataset = () => {
+    let labels = new Set()
+    Object.keys(allProcessingData).forEach(day => {
+      Object.keys(allProcessingData[day].ageTimeDiff).forEach(ageTimeDiffLabel => {
+        labels.add(ageTimeDiffLabel)
+      })
+    })
+
+    labels.forEach(label => {
+      Object.keys(allProcessingData).forEach(day => {
+        if (!allProcessingData[day].ageTimeDiff.hasOwnProperty(label))
+          allProcessingData[day].ageTimeDiff[label] = 0
+      })
+    })
+
+    let ret = {}
+    Object.keys(allProcessingData).forEach(day => {
+      allProcessingData[day].ageTimeDiff = Object.keys(allProcessingData[day].ageTimeDiff)
+        .sort()
+        .reduce((accumulator, key) => {
+          accumulator[key] = allProcessingData[day].ageTimeDiff[key];
+
+          return accumulator;
+        }, {});
+      ret.labels = Object.keys(allProcessingData[day].ageTimeDiff)
+    })
+
+
+    console.log("ageTimeDiff", allProcessingData[day]?.ageTimeDiff)
+    console.log("labels", Array.from(labels))
+
+
+    let datasets = [...Object.keys(allProcessingData).map(day => {
+      return {
+        label: `Day - ${day}`,
+        data: Object.values(allProcessingData[day].ageTimeDiff),
+        borderColor: DAY_COLORS[day],
+        backgroundColor: DAY_COLORS[day]
+      }
+    })]
+
+    ret.datasets = datasets
+
+    return ret
+  }
+
+  const lineChartAgeTimeDiff = {
+    labels: getAgeTimeDiffDataset().labels,
+    datasets: getAgeTimeDiffDataset().datasets,
+  };
+
+
+  const getGenderTimeDiffDataset = () => {
+    let ret = {}
+    ret.labels = [GENDER.FEMALE, GENDER.MALE]
+
+    let datasets = [...Object.keys(allProcessingData).map(day => {
+      return {
+        label: `Day - ${day}`,
+        data: [allProcessingData[day].genderTimeDiff[GENDER.FEMALE], allProcessingData[day].genderTimeDiff[GENDER.MALE]],
+        borderColor: DAY_COLORS[day],
+        backgroundColor: DAY_COLORS[day]
+      }
+    })]
+
+    ret.datasets = datasets
+
+    return ret
+  }
+
+  const lineChartGenderTimeDiff = {
+    labels: getGenderTimeDiffDataset().labels,
+    datasets: getGenderTimeDiffDataset().datasets,
+  };
 
   const getTimeDiffLabels = () => {
     let labels = new Set()
@@ -458,7 +580,7 @@ export const LineChart = () => {
               <Button
                 size="large"
                 variant="contained"
-                style={{ width: "50%", margin: "auto", display: "flex", backgroundColor:COLORS.COLOR_1 }}
+                style={{ width: "50%", margin: "auto", display: "flex", backgroundColor: COLORS.COLOR_1 }}
                 onClick={resetFilter}
               >Reset filter <RestartAltIcon style={{ display: "inline", margin: "0px 2px" }} /></Button>
             </Grid>
@@ -511,42 +633,52 @@ export const LineChart = () => {
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                    {
-                      day == 0 ? (
-                        <div style={{ padding: "10px", margin: "10px auto" }}>
-                          <Bar
-                            data={GenderBar}
-                            options={GenderBar.options}
-                          />
-                        </div>
-                      ) : (
-                        <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
-                          <Doughnut
-                            data={genderDoughnut}
-                            options={genderDoughnut.options}
-                          />
-                        </div>
-                      )
-                    }
+                  <div style={{ padding: "10px", margin: "10px" }}>
+                    <Line data={lineChartAgeTimeDiff} />
+                  </div>
                 </Grid>
                 <Grid item xs={6}>
-                {
-                      day == 0 ? (
-                        <div style={{ padding: "10px", margin: "10px auto" }}>
-                          <Bar
-                            data={ageBar}
-                            options={ageBar.options}
-                          />
-                        </div>
-                      ) : (
-                        <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
-                          <Doughnut
-                            data={ageDoughnut}
-                            options={ageDoughnut.options}
-                          />
-                        </div>
-                      )
-                    }
+                  <div style={{ padding: "10px", margin: "10px" }}>
+                    <Line data={lineChartGenderTimeDiff} />
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  {
+                    day == 0 ? (
+                      <div style={{ padding: "10px", margin: "10px auto" }}>
+                        <Bar
+                          data={GenderBar}
+                          options={GenderBar.options}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                        <Doughnut
+                          data={genderDoughnut}
+                          options={genderDoughnut.options}
+                        />
+                      </div>
+                    )
+                  }
+                </Grid>
+                <Grid item xs={6}>
+                  {
+                    day == 0 ? (
+                      <div style={{ padding: "10px", margin: "10px auto" }}>
+                        <Bar
+                          data={ageBar}
+                          options={ageBar.options}
+                        />
+                      </div>
+                    ) : (
+                      <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                        <Doughnut
+                          data={ageDoughnut}
+                          options={ageDoughnut.options}
+                        />
+                      </div>
+                    )
+                  }
                 </Grid>
               </>)
           }
