@@ -32,7 +32,7 @@ export const LineChart = () => {
 
   const [filteration, setFilteration] = useState({})
 
-  const allProcessingData = {}
+  const [allProcessingData, setAllProcessingData] = useState({})
 
   useEffect(() => {
     fetch(file)
@@ -59,7 +59,7 @@ export const LineChart = () => {
     })]
 
     setFilteredData(newFilteredData)
-  }, [filteration])
+  }, [filteration, data])
 
   const resetFilter = () => {
     setFilteration({})
@@ -91,11 +91,12 @@ export const LineChart = () => {
       totalWeight += weight
       totalWeightMulValue += value * weight
     })
-    
+
     return Math.round(totalWeightMulValue / totalWeight)
   }
 
   const calculateAllDataForChartsPrivate = (data) => {
+    setAllProcessingData({})
     for (let j = 0; j < Object.values(DAYS).length; j++) {
       let currentDay = Object.values(DAYS)[j]
       if (day && day != currentDay) continue;
@@ -172,17 +173,17 @@ export const LineChart = () => {
         genderTimeDiff
       }
 
-      if (!noDataInThisDay) allProcessingData[currentDay] = currentProcessingData
+      if (!noDataInThisDay) setAllProcessingData(data => ({
+        ...data,
+        [currentDay]: currentProcessingData
+      }))
     }
   }
 
-
-  const calculateAllDataForCharts = () => {
+  useEffect(() => {
     let processingData = filteredData.length ? filteredData : data;
     calculateAllDataForChartsPrivate(processingData)
-  }
-
-  calculateAllDataForCharts()
+  }, [filteration, filteredData, data, day])
 
   let lineChartLables = [];
   for (let i = 1; i <= 8; i++) { lineChartLables.push(i) }
@@ -214,14 +215,28 @@ export const LineChart = () => {
     return (
       <Grid item xs={8}>
         <div style={{ margin: "10px" }}>
-          <Alert severity="warning" size="large">Please select a file and day to show the data</Alert>
+          <Alert severity="warning" size="large">
+            There is no data for the selected file, day and filterations
+            {
+              Object.keys(filteration).length ? (
+                <>
+                  <p>The applied filteration are: </p>
+                  {
+                    Object.keys(filteration).map(filter => {
+                      return <p> {filter}: {filteration[filter]} </p>
+                    })
+                  }
+                </>
+              ) : null
+            }
+          </Alert>
         </div>
       </Grid>
     )
   }
 
   const isReadyToShowStatistics = () => {
-    return fileName && day != null
+    return fileName && day != null && Object.keys(allProcessingData).length > 0
   }
 
   const getInfo = () => {
@@ -260,7 +275,7 @@ export const LineChart = () => {
             !isReadyToShowStatistics() ? (getAlerts()) : (
               <>
                 <Grid item xs={8}>
-                  { getInfo() }
+                  {getInfo()}
                 </Grid>
                 <Grid item xs={6}>
                   <EmpolyeeCounter data={allProcessingData} />
@@ -278,7 +293,7 @@ export const LineChart = () => {
                   <GenderCounter data={allProcessingData} day={day} getClickedSegment={getClickedSegment} setFilteration={setFilteration} />
                 </Grid>
                 <Grid item xs={6}>
-                  <AgeCounter data={allProcessingData} day={day} getClickedSegment={getClickedSegment} setFilteration={setFilteration}/>
+                  <AgeCounter data={allProcessingData} day={day} getClickedSegment={getClickedSegment} setFilteration={setFilteration} />
                 </Grid>
               </>)
           }
