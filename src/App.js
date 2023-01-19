@@ -1,11 +1,11 @@
 import './App.css';
-import { LineChart } from './components/LineChart';
+import { Dashboard } from './components/Dashboard';
 
 
 function App() {
   return (
     <>
-      <LineChart />
+      <Dashboard />
     </>
   );
 }
