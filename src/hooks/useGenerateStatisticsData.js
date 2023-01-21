@@ -32,7 +32,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
       let ages = {}
       let spentTime = {}
       let averageSpentTimePerAge = {}
-      let genderTimeDiff = {}
+      let averageSpentTimePerGender = {}
 
       let noDataInThisDay = true
 
@@ -56,7 +56,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         if (!averageSpentTimePerAge.hasOwnProperty(age)) averageSpentTimePerAge[age] = {}
 
         let genderKey = isMale ? GENDER.MALE : GENDER.FEMALE
-        if (!genderTimeDiff.hasOwnProperty(genderKey)) genderTimeDiff[genderKey] = {}
+        if (!averageSpentTimePerGender.hasOwnProperty(genderKey)) averageSpentTimePerGender[genderKey] = {}
 
         maleCount += !!isMale;
         femaleCount += !!isFemale
@@ -71,8 +71,8 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
 
           let genderKey = isMale ? GENDER.MALE : GENDER.FEMALE
 
-          if (genderTimeDiff[genderKey].hasOwnProperty(totalDiffInMins)) genderTimeDiff[genderKey][totalDiffInMins]++;
-          else genderTimeDiff[genderKey][totalDiffInMins] = 1
+          if (averageSpentTimePerGender[genderKey].hasOwnProperty(totalDiffInMins)) averageSpentTimePerGender[genderKey][totalDiffInMins]++;
+          else averageSpentTimePerGender[genderKey][totalDiffInMins] = 1
         }
       }
 
@@ -80,8 +80,8 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         averageSpentTimePerAge[age] = getWeightedAverage(averageSpentTimePerAge[age])
       })
 
-      Object.keys(genderTimeDiff).forEach(gender => {
-        genderTimeDiff[gender] = getWeightedAverage(genderTimeDiff[gender])
+      Object.keys(averageSpentTimePerGender).forEach(gender => {
+        averageSpentTimePerGender[gender] = getWeightedAverage(averageSpentTimePerGender[gender])
       })
 
       let currentProcessingData = {
@@ -93,7 +93,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         ages,
         spentTime,
         averageSpentTimePerAge,
-        genderTimeDiff
+        averageSpentTimePerGender
       }
 
       if (!noDataInThisDay) setAllProcessingData(data => ({

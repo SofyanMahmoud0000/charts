@@ -36,7 +36,7 @@ const AverageSpentTimePerGender = ({data}) => {
     let datasets = [...Object.keys(data).map(day => {
       return {
         label: `Day - ${day}`,
-        data: [data[day].genderTimeDiff[GENDER.FEMALE], data[day].genderTimeDiff[GENDER.MALE]],
+        data: [data[day].averageSpentTimePerGender[GENDER.FEMALE], data[day].averageSpentTimePerGender[GENDER.MALE]],
         borderColor: DAY_COLORS[day],
         backgroundColor: DAY_COLORS[day]
       }

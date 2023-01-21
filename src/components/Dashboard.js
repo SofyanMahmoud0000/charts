@@ -6,6 +6,7 @@ import { loadCSVFile } from '../services/CSVLoader';
 
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import AppBarCom from './AppBarCom';
 import Buttons from './Buttons';
@@ -26,6 +27,8 @@ export const Dashboard = () => {
   const [fileName, setFileName] = useState(null)
   const [day, setDay] = useState(null)
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const [data, setData] = useState([])
   const [filteredData, setFilteredData] = useState([])
 
@@ -34,6 +37,7 @@ export const Dashboard = () => {
   const [allProcessingData, setAllProcessingData] = useState({})
 
   useEffect(() => {
+    setIsLoading(true)
     fetch(file)
       .then(res => res.text())
       .then(res => {
@@ -43,6 +47,7 @@ export const Dashboard = () => {
         })
         setFilteredData(data)
         setData(data)
+        setIsLoading(false)
       })
   }, [file])
 
@@ -134,8 +139,13 @@ export const Dashboard = () => {
   }
 
   const isReadyToShowStatistics = () => {
-    return fileName && day != null && Object.keys(allProcessingData).length > 0
+    return fileName 
+            && day != null 
+            && Object.keys(allProcessingData).length > 0
+            && !isLoading
   }
+
+
 
   const getInfo = () => {
     return (
@@ -170,7 +180,9 @@ export const Dashboard = () => {
             resetFilter={resetFilter}
           />
           {
-            !isReadyToShowStatistics() ? (getAlerts()) : (
+            !isReadyToShowStatistics() ? (
+              isLoading? (<CircularProgress />): getAlerts()
+              ) : (
               <>
                 <Grid item xs={8}>
                   {getInfo()}
