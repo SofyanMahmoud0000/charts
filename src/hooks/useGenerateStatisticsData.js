@@ -30,7 +30,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
       let femaleCount = 0
       let maleCount = 0
       let ages = {}
-      let timeDiff = {}
+      let spentTime = {}
       let ageTimeDiff = {}
       let genderTimeDiff = {}
 
@@ -63,8 +63,8 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
 
         let totalDiffInMins = data[i][COLUMN.DIFF_MINS]
         if (totalDiffInMins != -1) {
-          if (timeDiff.hasOwnProperty(totalDiffInMins)) timeDiff[totalDiffInMins]++;
-          else timeDiff[totalDiffInMins] = 1
+          if (spentTime.hasOwnProperty(totalDiffInMins)) spentTime[totalDiffInMins]++;
+          else spentTime[totalDiffInMins] = 1
 
           if (ageTimeDiff[age].hasOwnProperty(totalDiffInMins)) ageTimeDiff[age][totalDiffInMins]++;
           else ageTimeDiff[age][totalDiffInMins] = 1
@@ -91,7 +91,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         maleCount,
         femaleCount,
         ages,
-        timeDiff,
+        spentTime,
         ageTimeDiff,
         genderTimeDiff
       }

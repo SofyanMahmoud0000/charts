@@ -44,8 +44,8 @@ const SpentTime = ({ data, getClickedSegment, setFilteration }) => {
   const getTimeDiffLabels = () => {
     let labels = new Set()
     Object.keys(data).forEach(day => {
-      Object.keys(data[day].timeDiff).forEach(timeDiffLabel => {
-        labels.add(timeDiffLabel)
+      Object.keys(data[day].spentTime).forEach(spentTimeLabel => {
+        labels.add(spentTimeLabel)
       })
     })
 
@@ -55,22 +55,22 @@ const SpentTime = ({ data, getClickedSegment, setFilteration }) => {
   const getTimeDiffData = () => {
     let labels = new Set()
     Object.keys(data).forEach(day => {
-      Object.keys(data[day].timeDiff).forEach(timeDiffLabel => {
-        labels.add(timeDiffLabel)
+      Object.keys(data[day].spentTime).forEach(spentTimeLabel => {
+        labels.add(spentTimeLabel)
       })
     })
 
     labels.forEach(label => {
       Object.keys(data).forEach(day => {
-        if (!data[day].timeDiff.hasOwnProperty(label))
-          data[day].timeDiff[label] = 0
+        if (!data[day].spentTime.hasOwnProperty(label))
+          data[day].spentTime[label] = 0
       })
     })
 
     let ret = [...Object.keys(data).map(day => {
       return {
         label: `Day ${day}`,
-        data: Object.values(data[day].timeDiff),
+        data: Object.values(data[day].spentTime),
         borderColor: DAY_COLORS[day],
         backgroundColor: DAY_COLORS[day]
       }
