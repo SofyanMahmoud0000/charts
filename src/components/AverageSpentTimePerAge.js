@@ -31,34 +31,34 @@ const AverageSpentTimePerAge = ({data}) => {
   const getAgeTimeDiffData = () => {
     let labels = new Set()
     Object.keys(data).forEach(day => {
-      Object.keys(data[day].ageTimeDiff).forEach(ageTimeDiffLabel => {
-        labels.add(ageTimeDiffLabel)
+      Object.keys(data[day].averageSpentTimePerAge).forEach(averageSpentTimePerAgeLabel => {
+        labels.add(averageSpentTimePerAgeLabel)
       })
     })
 
     labels.forEach(label => {
       Object.keys(data).forEach(day => {
-        if (!data[day].ageTimeDiff.hasOwnProperty(label))
-          data[day].ageTimeDiff[label] = 0
+        if (!data[day].averageSpentTimePerAge.hasOwnProperty(label))
+          data[day].averageSpentTimePerAge[label] = 0
       })
     })
 
     let ret = {}
     Object.keys(data).forEach(day => {
-      data[day].ageTimeDiff = Object.keys(data[day].ageTimeDiff)
+      data[day].averageSpentTimePerAge = Object.keys(data[day].averageSpentTimePerAge)
         .sort()
         .reduce((accumulator, key) => {
-          accumulator[key] = data[day].ageTimeDiff[key];
+          accumulator[key] = data[day].averageSpentTimePerAge[key];
 
           return accumulator;
         }, {});
-      ret.labels = Object.keys(data[day].ageTimeDiff)
+      ret.labels = Object.keys(data[day].averageSpentTimePerAge)
     })
 
     let datasets = [...Object.keys(data).map(day => {
       return {
         label: `Day - ${day}`,
-        data: Object.values(data[day].ageTimeDiff),
+        data: Object.values(data[day].averageSpentTimePerAge),
         borderColor: DAY_COLORS[day],
         backgroundColor: DAY_COLORS[day]
       }

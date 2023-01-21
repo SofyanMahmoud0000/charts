@@ -31,7 +31,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
       let maleCount = 0
       let ages = {}
       let spentTime = {}
-      let ageTimeDiff = {}
+      let averageSpentTimePerAge = {}
       let genderTimeDiff = {}
 
       let noDataInThisDay = true
@@ -53,7 +53,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         if (ages.hasOwnProperty(age)) ages[age]++;
         else ages[age] = 1
 
-        if (!ageTimeDiff.hasOwnProperty(age)) ageTimeDiff[age] = {}
+        if (!averageSpentTimePerAge.hasOwnProperty(age)) averageSpentTimePerAge[age] = {}
 
         let genderKey = isMale ? GENDER.MALE : GENDER.FEMALE
         if (!genderTimeDiff.hasOwnProperty(genderKey)) genderTimeDiff[genderKey] = {}
@@ -66,8 +66,8 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
           if (spentTime.hasOwnProperty(totalDiffInMins)) spentTime[totalDiffInMins]++;
           else spentTime[totalDiffInMins] = 1
 
-          if (ageTimeDiff[age].hasOwnProperty(totalDiffInMins)) ageTimeDiff[age][totalDiffInMins]++;
-          else ageTimeDiff[age][totalDiffInMins] = 1
+          if (averageSpentTimePerAge[age].hasOwnProperty(totalDiffInMins)) averageSpentTimePerAge[age][totalDiffInMins]++;
+          else averageSpentTimePerAge[age][totalDiffInMins] = 1
 
           let genderKey = isMale ? GENDER.MALE : GENDER.FEMALE
 
@@ -76,8 +76,8 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         }
       }
 
-      Object.keys(ageTimeDiff).forEach(age => {
-        ageTimeDiff[age] = getWeightedAverage(ageTimeDiff[age])
+      Object.keys(averageSpentTimePerAge).forEach(age => {
+        averageSpentTimePerAge[age] = getWeightedAverage(averageSpentTimePerAge[age])
       })
 
       Object.keys(genderTimeDiff).forEach(gender => {
@@ -92,7 +92,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         femaleCount,
         ages,
         spentTime,
-        ageTimeDiff,
+        averageSpentTimePerAge,
         genderTimeDiff
       }
 
