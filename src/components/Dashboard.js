@@ -142,7 +142,7 @@ export const Dashboard = () => {
     return fileName 
             && day != null 
             && Object.keys(allProcessingData).length > 0
-            && !isLoading
+            // && !isLoading
   }
 
 
