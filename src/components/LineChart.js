@@ -26,7 +26,7 @@ import { DAY_COLORS } from '../enums/Days';
 import { COLUMN } from '../enums/Columns';
 import { loadCSVFile } from '../services/CSVLoader';
 import * as MATH_UTILS from "../Utils/Math"
-import { GENDER } from '../enums/Constants';
+import { GENDER, SPENT_TIME_LIMIT } from '../enums/Constants';
 import { COLORS } from '../enums/Colors';
 
 import Grid from '@mui/material/Grid';
@@ -177,7 +177,7 @@ export const LineChart = () => {
 
 
         let totalDiffInMins = data[i][COLUMN.DIFF_MINS]
-        if (totalDiffInMins != -1) {
+        if (totalDiffInMins != -1 && totalDiffInMins <= SPENT_TIME_LIMIT) {
           if (timeDiff.hasOwnProperty(totalDiffInMins)) timeDiff[totalDiffInMins]++;
           else timeDiff[totalDiffInMins] = 1
 
@@ -206,6 +206,8 @@ export const LineChart = () => {
       Object.keys(genderTimeDiff).forEach(gender => {
         let minsMulWeight = 0
         let weight = 0
+
+    
 
         Object.keys(genderTimeDiff[gender]).forEach(mins => {
           weight += genderTimeDiff[gender][mins]
