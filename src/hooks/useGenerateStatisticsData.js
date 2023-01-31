@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import {DAYS} from '../enums/Days'
 import {COLUMN} from "../enums/Columns"
 import { GENDER } from "../enums/Constants"
+import { SPENT_TIME_LIMIT } from "../enums/Constants"
 
 const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllProcessingData) => {
   
@@ -64,7 +65,7 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
         femaleCount += !!isFemale
 
         let totalDiffInMins = data[i][COLUMN.DIFF_MINS]
-        if (totalDiffInMins != -1) {
+        if (totalDiffInMins != -1 && totalDiffInMins <= SPENT_TIME_LIMIT) {
           if (spentTime.hasOwnProperty(totalDiffInMins)) spentTime[totalDiffInMins]++;
           else spentTime[totalDiffInMins] = 1
 
