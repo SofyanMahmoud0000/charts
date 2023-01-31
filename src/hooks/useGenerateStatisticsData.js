@@ -22,7 +22,9 @@ const useGenerateStatisticsData = (filteration, filteredData, data, day, setAllP
     setAllProcessingData({})
     for (let j = 0; j < Object.values(DAYS).length; j++) {
       let currentDay = Object.values(DAYS)[j]
-      if (day && day != currentDay) continue;
+      if (Array.isArray(currentDay)) continue;
+      if (!Array.isArray(day) && day != currentDay) continue;
+      if (Array.isArray(day) && !day.includes(currentDay)) continue;
 
       let femaleAndMale = Array(9).fill(0)
       let female = Array(9).fill(0)

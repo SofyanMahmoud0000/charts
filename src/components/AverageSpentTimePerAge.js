@@ -72,12 +72,28 @@ const AverageSpentTimePerAge = ({data}) => {
   const lineChartAgeTimeDiff = {
     labels: getAgeTimeDiffData().labels,
     datasets: getAgeTimeDiffData().datasets,
+    options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Average spent time'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Age'
+          }
+        }
+      }
+    }
   };
 
   return (
     <div style={{ padding: "10px", margin: "10px", textAlign:"center", backgroundColor:"#f5f3f3", borderRadius:"10px" }}>
       <h1>Average spent time per age</h1>
-      <Line data={lineChartAgeTimeDiff} />
+      <Line data={lineChartAgeTimeDiff} options={lineChartAgeTimeDiff.options} />
     </div>
   )
 }

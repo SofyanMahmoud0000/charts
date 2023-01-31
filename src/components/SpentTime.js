@@ -67,7 +67,20 @@ const SpentTime = ({ data, getClickedSegment, setFilteration }) => {
       })
     })
 
-    let ret = [...Object.keys(data).map(day => {
+
+    let ret = {}
+    Object.keys(data).forEach(day => {
+      data[day].spentTime = Object.keys(data[day].spentTime)
+        .sort()
+        .reduce((accumulator, key) => {
+          accumulator[key] = data[day].spentTime[key];
+
+          return accumulator;
+        }, {});
+      ret.labels = Object.keys(data[day].spentTime)
+    })
+
+    let datasets = [...Object.keys(data).map(day => {
       return {
         label: `Day ${day}`,
         data: Object.values(data[day].spentTime),
@@ -76,17 +89,30 @@ const SpentTime = ({ data, getClickedSegment, setFilteration }) => {
       }
     })]
 
+    ret.datasets = datasets;
     return ret
   }
 
   const diffTimeBar = {
-    labels: getTimeDiffLabels(),
-    datasets: [
-      ...getTimeDiffData()
-    ],
+    labels: getTimeDiffData().labels,
+    datasets: getTimeDiffData().datasets,
     options: {
       onClick: (evt, element) => {
         addFilteration(getClickedSegment(element, diffTimeBar))
+      },
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Count of people'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Spent time'
+          }
+        }
       }
     }
   };

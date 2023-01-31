@@ -1,5 +1,5 @@
 import React from 'react'
-import {DAY_COLORS} from "../enums/Days"
+import {LINE_CHART_COLORS} from "../enums/Colors"
 import {
   Line
 } from 'react-chartjs-2';
@@ -37,24 +37,22 @@ const EmpolyeeCounter = ({data}) => {
       ret.push({
         label: `All - ${day}`,
         data: data[day].femaleAndMale,
-        borderColor: DAY_COLORS[day],
-        backgroundColor: DAY_COLORS[day],
+        borderColor: LINE_CHART_COLORS[day][0],
+        backgroundColor: LINE_CHART_COLORS[day][0],
       })
 
       ret.push({
         label: `female - ${day}`,
         data: data[day].female,
-        borderColor: DAY_COLORS[day],
-        borderDash: [2, 2],
-        backgroundColor: DAY_COLORS[day],
+        borderColor: LINE_CHART_COLORS[day][1],
+        backgroundColor: LINE_CHART_COLORS[day][1],
       })
 
       ret.push({
         label: `male - ${day}`,
         data: data[day].male,
-        borderColor: DAY_COLORS[day],
-        borderDash: [10, 10],
-        backgroundColor: DAY_COLORS[day],
+        borderColor: LINE_CHART_COLORS[day][2],
+        backgroundColor: LINE_CHART_COLORS[day][2],
       })
     })
 
@@ -64,11 +62,27 @@ const EmpolyeeCounter = ({data}) => {
   const lineChart = {
     labels: lineChartLables,
     datasets: getDatasetForLineChart(),
+    options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Employee count'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Time (hour)'
+          }
+        }
+      }
+    }
   };
   return (
     <div style={{ padding: "10px", margin: "10px", textAlign:"center", backgroundColor:"#f5f3f3", borderRadius:"10px" }}>
       <h1>Employee counter</h1>
-      <Line data={lineChart} />
+      <Line data={lineChart} options={lineChart.options}/>
     </div>
   )
 }

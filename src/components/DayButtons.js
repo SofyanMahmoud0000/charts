@@ -12,14 +12,14 @@ const FileButtons = ({handleButtonClick}) => {
         {
           Object.values(DAYS).map(DAY => {
             return (
-              <Grid item xs={!DAY? 4: 2} >
+              <Grid item xs={Array.isArray(DAY)? 4: 2} >
                 <Button 
                   size="large" 
                   variant="contained" 
                   style={{ width: "50%", margin: "auto", display:"grid", backgroundColor: !DAY? COLORS.COLOR_2:"" }}
                   onClick={() => handleButtonClick(DAY)}
-                  color={!DAY? "secondary": "primary"}
-                  >{DAY? `Day ${DAY}`: `All days`}</Button>
+                  color={Array.isArray(DAY)? "secondary": "primary"}
+                  >{!Array.isArray(DAY)? `Day ${DAY}`: `All ${DAY[0]}`}</Button>
               </Grid>
             )
           })

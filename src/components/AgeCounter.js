@@ -113,6 +113,20 @@ const AgeCounter = ({ data, day, getClickedSegment, setFilteration }) => {
     options: {
       onClick: (evt, element) => {
         addFilteration(getClickedSegment(element, ageBar))
+      },
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Count of people'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Age'
+          }
+        }
       }
     }
   };
@@ -122,7 +136,7 @@ const AgeCounter = ({ data, day, getClickedSegment, setFilteration }) => {
       <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
         <h1>Age count</h1>
         {
-          day == 0 ? (
+          Array.isArray(day) ? (
             <Bar
               data={ageBar}
               options={ageBar.options}

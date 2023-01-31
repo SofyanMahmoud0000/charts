@@ -50,11 +50,27 @@ const AverageSpentTimePerGender = ({data}) => {
   const lineChartGenderTimeDiff = {
     labels: getGenderTimeDiffDataset().labels,
     datasets: getGenderTimeDiffDataset().datasets,
+    options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Average spent time'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Gender'
+          }
+        }
+      }
+    }
   };
   return (
     <div style={{ padding: "10px", margin: "10px", textAlign:"center", backgroundColor:"#f5f3f3", borderRadius:"10px" }}>
       <h1>Average spent time per gender</h1>
-      <Line data={lineChartGenderTimeDiff} />
+      <Line data={lineChartGenderTimeDiff} options={lineChartGenderTimeDiff.options} />
     </div>
   )
 }
