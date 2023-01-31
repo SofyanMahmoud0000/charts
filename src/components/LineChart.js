@@ -5,6 +5,7 @@ import {
   getElementAtEvent,
   getElementsAtEvent,
 } from 'react-chartjs-2';
+import {LINE_CHART_COLORS} from "../enums/Colors"
 import * as Papa from 'papaparse';
 import Alert from '@mui/material/Alert';
 import {
@@ -128,7 +129,9 @@ export const LineChart = () => {
   const calculateAllDataForChartsPrivate = (data) => {
     for (let j = 0; j < Object.values(DAYS).length; j++) {
       let currentDay = Object.values(DAYS)[j]
-      if (day && day != currentDay) continue;
+      if (Array.isArray(currentDay)) continue;
+      if (!Array.isArray(day) && day != currentDay) continue;
+      if (Array.isArray(day) && !day.includes(currentDay)) continue;
 
       femaleAndMale = Array(9).fill(0)
       female = Array(9).fill(0)
@@ -166,7 +169,7 @@ export const LineChart = () => {
 
         if (!ageTimeDiff.hasOwnProperty(age)) ageTimeDiff[age] = {}
 
-        let genderKey = isMale? GENDER.MALE: GENDER.FEMALE
+        let genderKey = isMale ? GENDER.MALE : GENDER.FEMALE
         if (!genderTimeDiff.hasOwnProperty(genderKey)) genderTimeDiff[genderKey] = {}
 
         maleCount += !!isMale;
@@ -181,7 +184,7 @@ export const LineChart = () => {
           if (ageTimeDiff[age].hasOwnProperty(totalDiffInMins)) ageTimeDiff[age][totalDiffInMins]++;
           else ageTimeDiff[age][totalDiffInMins] = 1
 
-          let genderKey = isMale? GENDER.MALE: GENDER.FEMALE
+          let genderKey = isMale ? GENDER.MALE : GENDER.FEMALE
 
           if (genderTimeDiff[genderKey].hasOwnProperty(totalDiffInMins)) genderTimeDiff[genderKey][totalDiffInMins]++;
           else genderTimeDiff[genderKey][totalDiffInMins] = 1
@@ -245,24 +248,22 @@ export const LineChart = () => {
       ret.push({
         label: `All - ${day}`,
         data: allProcessingData[day].femaleAndMale,
-        borderColor: DAY_COLORS[day],
-        backgroundColor: DAY_COLORS[day],
+        borderColor: LINE_CHART_COLORS[day][0],
+        backgroundColor: LINE_CHART_COLORS[day][0],
       })
 
       ret.push({
         label: `female - ${day}`,
         data: allProcessingData[day].female,
-        borderColor: DAY_COLORS[day],
-        borderDash: [2, 2],
-        backgroundColor: DAY_COLORS[day],
+        borderColor: LINE_CHART_COLORS[day][1],
+        backgroundColor: LINE_CHART_COLORS[day][1],
       })
 
       ret.push({
         label: `male - ${day}`,
         data: allProcessingData[day].male,
-        borderColor: DAY_COLORS[day],
-        borderDash: [10, 10],
-        backgroundColor: DAY_COLORS[day],
+        borderColor: LINE_CHART_COLORS[day][2],
+        backgroundColor: LINE_CHART_COLORS[day][2],
       })
     })
 
@@ -273,6 +274,22 @@ export const LineChart = () => {
   const lineChart = {
     labels: lineChartLables,
     datasets: getDatasetForLineChart(),
+    options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Employee count'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Time (hour)'
+          }
+        }
+      }
+    }
   };
 
 
@@ -341,7 +358,19 @@ export const LineChart = () => {
       })
     })
 
-    let ret = [...Object.keys(allProcessingData).map(day => {
+    let ret = {}
+    Object.keys(allProcessingData).forEach(day => {
+      allProcessingData[day].timeDiff = Object.keys(allProcessingData[day].timeDiff)
+        .sort()
+        .reduce((accumulator, key) => {
+          accumulator[key] = allProcessingData[day].timeDiff[key];
+
+          return accumulator;
+        }, {});
+      ret.labels = Object.keys(allProcessingData[day].timeDiff)
+    })
+
+    let datasets = [...Object.keys(allProcessingData).map(day => {
       return {
         label: `Day ${day}`,
         data: Object.values(allProcessingData[day].timeDiff),
@@ -350,6 +379,7 @@ export const LineChart = () => {
       }
     })]
 
+    ret.datasets = datasets;
     return ret
   }
 
@@ -402,6 +432,22 @@ export const LineChart = () => {
   const lineChartAgeTimeDiff = {
     labels: getAgeTimeDiffDataset().labels,
     datasets: getAgeTimeDiffDataset().datasets,
+    options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Average spent time'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Age'
+          }
+        }
+      }
+    }
   };
 
 
@@ -426,6 +472,22 @@ export const LineChart = () => {
   const lineChartGenderTimeDiff = {
     labels: getGenderTimeDiffDataset().labels,
     datasets: getGenderTimeDiffDataset().datasets,
+    options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Average spent time'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Gender'
+          }
+        }
+      }
+    }
   };
 
   const getTimeDiffLabels = () => {
@@ -440,15 +502,28 @@ export const LineChart = () => {
   }
 
   const diffTimeBar = {
-    labels: getTimeDiffLabels(),
-    datasets: [
-      ...getTimeDiffData()
-    ],
+    labels: getTimeDiffData().labels,
+    datasets: getTimeDiffData().datasets,
     options: {
       onClick: (evt, element) => {
         addNewFilteration(element, diffTimeBar)
+      },
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Count of people'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Spent time'
+          }
+        }
       }
     }
+
   };
 
 
@@ -467,7 +542,19 @@ export const LineChart = () => {
       })
     })
 
-    let ret = [...Object.keys(allProcessingData).map(day => {
+    let ret = {}
+    Object.keys(allProcessingData).forEach(day => {
+      allProcessingData[day].ages = Object.keys(allProcessingData[day].ages)
+        .sort()
+        .reduce((accumulator, key) => {
+          accumulator[key] = allProcessingData[day].ages[key];
+
+          return accumulator;
+        }, {});
+      ret.labels = Object.keys(allProcessingData[day].ages)
+    })
+
+    let datasets = [...Object.keys(allProcessingData).map(day => {
       return {
         label: `Day ${day}`,
         data: Object.values(allProcessingData[day].ages),
@@ -476,29 +563,31 @@ export const LineChart = () => {
       }
     })]
 
+    ret.datasets = datasets;
     return ret
   }
 
-  const getAgeLabels = () => {
-    let labels = new Set()
-    Object.keys(allProcessingData).forEach(day => {
-      Object.keys(allProcessingData[day].ages).forEach(age => {
-        labels.add(age)
-      })
-    })
-
-    return Array.from(labels)
-  }
-
   const ageBar = {
-    labels: getAgeLabels(),
-    datasets: [
-      ...getAgeData()
-    ],
+    labels: getAgeData().labels,
+    datasets: getAgeData().datasets,
     options: {
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Count of people'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Age'
+          }
+        }
+      },
       onClick: (evt, element) => {
         addNewFilteration(element, ageBar)
-      }
+      },
     }
   };
 
@@ -525,6 +614,20 @@ export const LineChart = () => {
     options: {
       onClick: (evt, element) => {
         addNewFilteration(element, GenderBar)
+      },
+      scales: {
+        y: {
+          title: {
+            display: true,
+            text: 'Count of people'
+          }
+        },
+        x: {
+          title: {
+            display: true,
+            text: 'Gender'
+          }
+        }
       }
     }
   };
@@ -620,12 +723,14 @@ export const LineChart = () => {
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div style={{ padding: "10px", margin: "10px" }}>
-                    <Line data={lineChart} />
+                  <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
+                    <h1>Employee counter</h1>
+                    <Line data={lineChart} options={lineChart.options} />
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div style={{ padding: "10px", margin: "10px" }}>
+                  <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
+                    <h1>Spent time</h1>
                     <Bar
                       data={diffTimeBar}
                       options={diffTimeBar.options}
@@ -633,45 +738,48 @@ export const LineChart = () => {
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div style={{ padding: "10px", margin: "10px" }}>
-                    <Line data={lineChartAgeTimeDiff} />
+                  <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
+                    <h1>Average spent time per age</h1>
+                    <Line data={lineChartAgeTimeDiff} options={lineChartAgeTimeDiff.options} />
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                  <div style={{ padding: "10px", margin: "10px" }}>
-                    <Line data={lineChartGenderTimeDiff} />
+                  <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
+                    <h1>Average spent time per gender</h1>
+                    <Line data={lineChartGenderTimeDiff} options={lineChartGenderTimeDiff.options} />
                   </div>
                 </Grid>
                 <Grid item xs={6}>
-                  {
-                    day == 0 ? (
-                      <div style={{ padding: "10px", margin: "10px auto" }}>
-                        <Bar
-                          data={GenderBar}
-                          options={GenderBar.options}
-                        />
-                      </div>
-                    ) : (
-                      <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
-                        <Doughnut
-                          data={genderDoughnut}
-                          options={genderDoughnut.options}
-                        />
-                      </div>
-                    )
-                  }
+                  <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
+                    <h1>Gender counter</h1>
+                    {
+                      Array.isArray(day) ? (
+                          <Bar
+                            data={GenderBar}
+                            options={GenderBar.options}
+                          />
+                      ) : (
+                        <div style={{margin: "auto", width: "50%" }}>
+                          <Doughnut
+                            data={genderDoughnut}
+                            options={genderDoughnut.options}
+                          />
+                        </div>
+                      )
+                    }
+                  </div>
                 </Grid>
                 <Grid item xs={6}>
+                <div style={{ padding: "10px", margin: "10px", textAlign: "center", backgroundColor: "#f5f3f3", borderRadius: "10px" }}>
+                    <h1>Age counter</h1>
                   {
-                    day == 0 ? (
-                      <div style={{ padding: "10px", margin: "10px auto" }}>
+                    Array.isArray(day) ? (
                         <Bar
                           data={ageBar}
                           options={ageBar.options}
                         />
-                      </div>
                     ) : (
-                      <div style={{ padding: "10px", margin: "10px auto", width: "50%" }}>
+                      <div style={{margin: "auto", width: "50%" }}>
                         <Doughnut
                           data={ageDoughnut}
                           options={ageDoughnut.options}
@@ -679,6 +787,7 @@ export const LineChart = () => {
                       </div>
                     )
                   }
+                  </div>
                 </Grid>
               </>)
           }
